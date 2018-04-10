@@ -16,8 +16,10 @@ module Fastlane
 
         if params[:target] then
             path = find_path_using_target(params)
-        else
+        elsif params[:scheme] then
             path = find_path_using_scheme(params)
+        else 
+            path = find_path(params)
         end
         path
       end
@@ -51,6 +53,18 @@ module Fastlane
         unless (Pathname.new path).absolute?
           path = File.join(project.path.parent.to_path, path)
         end
+        path
+      end
+
+      def self.find_path(params)
+        config = { project: params[:xcodeproj] }
+        project = FastlaneCore::Project.new(config)
+
+        path = project.build_settings(key: 'INFOPLIST_FILE')
+        unless (Pathname.new path).absolute?
+          path = File.join(Pathname.new(project.path).parent.to_path, path)
+        end
+        puts path
         path
       end
 
